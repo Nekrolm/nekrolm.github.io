@@ -1,0 +1,17 @@
+[package]
+name = "minesweeper-bevy"
+version = "0.1.0"
+edition = "2024"
+
+
+
+[dependencies]
+bevy = "0.15"
+rand = "0.9"
+
+[target.wasm32-unknown-unknown.dependencies]
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"
+
