@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>My Blog</title>
+        <script src="marked.min.js"></script>
+    </head>
+    <body>
+        <h1>Dmitry / Undefined Behavior / Blog</h1>
+        <div id="posts"></div>
+
+        <script>
+            const posts = ["posts/hello-world.md"]; // your files
+
+            const container = document.getElementById("posts");
+
+            posts.forEach(async (file) => {
+                const res = await fetch(file);
+                const text = await res.text();
+                const html = marked.parse(text);
+
+                const article = document.createElement("article");
+                article.innerHTML = html;
+                container.appendChild(article);
+            });
+        </script>
+    </body>
+</html>
