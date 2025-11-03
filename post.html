@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Blog post</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="marked.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+      a.back { display:inline-block; margin-bottom:1rem; color:#007acc; text-decoration:none; }
+      article img { max-width:100%; height:auto; }
+    </style>
+  </head>
+  <body>
+    <a class="back" href="blog.html">← Back to posts</a>
+    <div id="content">Loading...</div>
+
+    <script>
+      function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+      }
+
+      async function loadPost(path) {
+        try {
+          const res = await fetch(path);
+          if (!res.ok) throw new Error('Failed to load post: ' + res.status);
+          const text = await res.text();
+          document.title = (text.split('\n')[0] || 'Post').replace(/^#\s*/, '') + ' — Blog';
+          document.getElementById('content').innerHTML = marked.parse(text);
+          window.scrollTo(0,0);
+        } catch (err) {
+          document.getElementById('content').innerHTML = '<p>Error loading post.</p>';
+          console.error(err);
+        }
+      }
+
+      const postPath = getQueryParam('post');
+      if (postPath) {
+        loadPost(postPath);
+      } else {
+        document.getElementById('content').innerHTML = '<p>No post specified. Return to <a href="blog.html">posts list</a>.</p>';
+      }
+    </script>
+  </body>
+</html>
