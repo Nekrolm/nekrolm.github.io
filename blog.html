@@ -8,22 +8,78 @@
     </head>
     <body>
         <h1>Dmitry / Undefined Behavior / Blog</h1>
-        <div id="posts"></div>
+
+        <div id="posts-list"></div>
+        <div id="post-view" style="display:none;"></div>
 
         <script>
             const posts = ["posts/leaving-aws.md"]; // your files
 
-            const container = document.getElementById("posts");
+            const listContainer = document.getElementById("posts-list");
+            const viewContainer = document.getElementById("post-view");
 
-            posts.forEach(async (file) => {
-                const res = await fetch(file);
-                const text = await res.text();
-                const html = marked.parse(text);
+            function basename(path) {
+                return path.split('/').pop();
+            }
 
-                const article = document.createElement("article");
-                article.innerHTML = html;
-                container.appendChild(article);
+            function prettyTitle(filename) {
+                const name = filename.replace(/\.md$/i, '');
+                return name.replace(/[-_]/g, ' ');
+            }
+
+            async function loadPost(path) {
+                try {
+                    const res = await fetch(path);
+                    if (!res.ok) throw new Error('Failed to load post: ' + res.status);
+                    const text = await res.text();
+                    const html = marked.parse(text);
+
+                    // Render post with a simple header and back link
+                    viewContainer.innerHTML = `
+                        <p><a href="#" id="back-link">← Back to posts</a></p>
+                        <article>${html}</article>
+                    `;
+                    document.getElementById('back-link').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showList();
+                    });
+
+                    showPost();
+                    // scroll to top of post view
+                    window.scrollTo(0, 0);
+                } catch (err) {
+                    viewContainer.innerHTML = '<p>Error loading post.</p>';
+                    showPost();
+                    console.error(err);
+                }
+            }
+
+            function showPost() {
+                listContainer.style.display = 'none';
+                viewContainer.style.display = '';
+            }
+
+            function showList() {
+                viewContainer.style.display = 'none';
+                listContainer.style.display = '';
+                viewContainer.innerHTML = '';
+            }
+
+            // Build links list
+            const ul = document.createElement('ul');
+            posts.forEach((file) => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = '#';
+                a.textContent = prettyTitle(basename(file));
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadPost(file);
+                });
+                li.appendChild(a);
+                ul.appendChild(li);
             });
+            listContainer.appendChild(ul);
         </script>
     </body>
 </html>
